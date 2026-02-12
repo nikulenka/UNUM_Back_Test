@@ -1,0 +1,32 @@
+//@version=5
+strategy("RSI Crossover Strategy [Antigravity]", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+// --- Inputs ---
+rsiLength = input.int(14, minval=1, title="RSI Length")
+rsiSource = input.source(close, title="RSI Source")
+overboughtLevel = input.int(70, minval=1, maxval=100, title="Overbought Level")
+oversoldLevel = input.int(30, minval=1, maxval=100, title="Oversold Level")
+
+// --- Indicators ---
+rsiValue = ta.rsi(rsiSource, rsiLength)
+
+// --- Logic ---
+// Long Condition: RSI crosses over Oversold level (Reversion to mean / Recovery)
+longCondition = ta.crossover(rsiValue, oversoldLevel)
+
+// Short Condition: RSI crosses under Overbought level (Correction)
+shortCondition = ta.crossunder(rsiValue, overboughtLevel)
+
+// --- Execution ---
+if (longCondition)
+    strategy.entry("Long", strategy.long)
+
+if (shortCondition)
+    strategy.entry("Short", strategy.short)
+
+// --- Plotting ---
+plotshape(longCondition, title="Buy Signal", location=location.belowbar, color=color.green, style=shape.labelup, text="BUY")
+plotshape(shortCondition, title="Sell Signal", location=location.abovebar, color=color.red, style=shape.labeldown, text="SELL")
+
+// Plot RSI in a separate pane for reference (optional, better to add built-in RSI indicator)
+// bgcolor(rsiValue > overboughtLevel ? color.new(color.red, 90) : rsiValue < oversoldLevel ? color.new(color.green, 90) : na)
